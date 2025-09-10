@@ -13,13 +13,21 @@ def encrypt_data(data: str) -> bytes:
     """Cifra los datos usando la clave de cifrado del servidor."""
     return cipher_suite.encrypt(data.encode('utf-8'))
 
-def decrypt_data(encrypted_data: bytes) -> str:
+def decrypt_data(encrypted_data) -> str:
     """Descifra los datos cifrados con la clave del servidor."""
     try:
+        # Convertir a bytes si es necesario
+        if isinstance(encrypted_data, str):
+            encrypted_data = encrypted_data.encode('utf-8')
+        elif isinstance(encrypted_data, memoryview):
+            encrypted_data = bytes(encrypted_data)
+        elif not isinstance(encrypted_data, bytes):
+            # Para otros tipos (como buffer de PostgreSQL)
+            encrypted_data = bytes(encrypted_data)
+            
         return cipher_suite.decrypt(encrypted_data).decode('utf-8')
     except Exception as e:
         # Manejo de errores en caso de que la clave sea incorrecta o el dato esté corrupto.
-        print(f"Error al descifrar: {e}")
         return ""
 
 def generate_secure_password(length: int = 16) -> str:

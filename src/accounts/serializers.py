@@ -1,9 +1,8 @@
 """
-users_app/serializers.py - Serializadores de autenticación actualizados.
+users_app/serializers.py - Serializadores de autenticación actualizados con JWT.
 """
 from rest_framework import serializers
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from django.contrib.auth import authenticate
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -26,33 +25,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         return user
 
-class AuthTokenEmailSerializer(AuthTokenSerializer):
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = User.EMAIL_FIELD
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Add custom claims
+        token['username'] = user.username
+        token['email'] = user.email
+        return token
+
+class LogoutSerializer(serializers.Serializer):
     """
-    Serializador personalizado para autenticación con email en lugar de username.
+    Serializador para el logout - requiere el refresh token.
     """
-    email = serializers.EmailField(label="Email")
-    username = None # Deshabilitamos el campo username del serializador base
-
-    def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        if email and password:
-            # Buscamos al usuario por correo electrónico
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                msg = ('Unable to log in with provided credentials.')
-                raise serializers.ValidationError(msg, code='authorization')
-            
-            # Verificamos la contraseña
-            if not user.check_password(password):
-                msg = ('Unable to log in with provided credentials.')
-                raise serializers.ValidationError(msg, code='authorization')
-
-        else:
-            msg = ('Must include "email" and "password".')
-            raise serializers.ValidationError(msg, code='authorization')
-
-        attrs['user'] = user
-        return attrs
+    refresh = serializers.CharField(help_text="Refresh token para invalidar")

@@ -15,7 +15,7 @@ class PasswordRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = PasswordRecord
         # Se elimina el campo 'url' de los campos serializados
-        fields = ('id', 'label', 'username', 'password', 'created_at', 'updated_at')
+        fields = ('id', 'title', 'username', 'password', 'notes', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
     def create(self, validated_data):
