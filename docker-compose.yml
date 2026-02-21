@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  web:
+    build: .
+    container_name: password-manager-web
+    env_file:
+      - .env                   # opcional, si usas dotenv
+    environment:
+      - POSTGRES_HOST=db
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/app/static   # para collectstatic
+  db:
+    image: postgres:15
+    container_name: password-manager-db
+    restart: always
+    environment:
+      POSTGRES_DB: manager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1302
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  static_volume:

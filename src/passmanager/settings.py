@@ -10,24 +10,19 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-km=3s2icen&ozt3yq_$)#tl613bk^0fgalk3sttu&zy3dln3u*'
-ENCRYPTION_KEY = b'WatomX-6xJTJZwGI7NL5MElwgcMbp0VDhXeqlawEIYw='
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+# claves sensibles se leen del entorno; en desarrollo vienen con valores por defecto
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "clave_de_desarrollo")
+ENCRYPTION_KEY = os.environ.get("DJANGO_ENCRYPTION_KEY", b"WatomX-6xJTJZwGI7NL5MElwgcMbp0VDhXeqlawEIYw=")
+ACCESS_TOKEN_LIFETIME = os.environ.get("ACCESS_TOKEN_LIFETIME", 60)  # en minutos
+REFRESH_TOKEN_LIFETIME = os.environ.get("REFRESH_TOKEN_LIFETIME", 30)  # en días
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
 
 # Application definition
 
@@ -84,16 +79,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'manager',         # Reemplaza con el nombre de tu base de datos
-        'USER': 'postgres',    # Reemplaza con tu usuario de PostgreSQL
-        'PASSWORD': '1302',       # Reemplaza con tu contraseña
-        'HOST': 'localhost',               # O la IP de tu servidor de base de datos
-        'PORT': '5432',                    # El puerto por defecto de PostgreSQL
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_DB", "manager"),
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
+        "HOST": os.environ.get("POSTGRES_HOST", "db"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -148,13 +142,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # JWT Configuration
-from datetime import timedelta
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
