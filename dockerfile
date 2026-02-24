@@ -13,8 +13,10 @@ COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
-# copiar el resto del código
-COPY src/ ./src/
+# copiar el resto del código al directorio de trabajo
+# ubicamos los ficheros directamente en /app para que el paquete
+# `passmanager` esté en el path de Python sin necesidad de PYTHONPATH
+COPY src/ .
 COPY README.md ./
 
 # variables por defecto (se sobreescriben con docker-compose)
